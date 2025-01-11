@@ -104,8 +104,8 @@
 
         const baseColor = '#4F46E5'
         const calcColor = (value) => {
-          return value >= 0 ? calculateTintAndShade(baseColor, value).tint.hex
-            : calculateTintAndShade(baseColor, -value).shade.hex
+          return value >= 0 ? calculateTintAndShade(baseColor, value).shade.hex
+            : calculateTintAndShade(baseColor, -value).tint.hex
         }
         // Sample data: countries with values between -1 and 1
         var datasetDefault = {
