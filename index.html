@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Map with Data Colors</title>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.all.min.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        /* display: flex; */
+        /* align-items: stretch; */
+        /* justify-content: stretch; */
+        min-width: 200px;
+      }
+        #container {
+            position: relative;
+            min-width: 300px;
+            /* width: 400px; */
+            /* height: 500px; */
+            /* margin: auto auto; */
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script>
+        // Parse URL search parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramsObject = Object.fromEntries(urlParams.entries());
+        const value = JSON.parse(paramsObject.value || [])
+        const countryGroups = paramsObject.countries.split('|').map(t => t.split(','))
+        
+        const dataset = {};
+        countryGroups.forEach((cs, i) => {
+          cs.forEach(country => {
+            dataset[country] = { value: value[i], fillKey: country }
+          })
+        })
+
+        // Sample data: countries with values between -1 and 1
+        var datasetDefault = {
+            'USA': {value: 0.8, fillKey: 'USA'},
+            'CAN': {value: 0.6, fillKey: 'CAN'},
+            'RUS': {value: -0.7, fillKey: 'RUS'},
+            'CHN': {value: -0.3, fillKey: 'CHN'},
+            'BRA': {value: 0.4, fillKey: 'BRA'},
+            'IND': {value: 0.2, fillKey: 'IND'},
+            'AUS': {value: 0.9, fillKey: 'AUS'},
+            'FRA': {value: -0.5, fillKey: 'FRA'},
+            'DEU': {value: 0.3, fillKey: 'DEU'},
+            'GBR': {value: 0.5, fillKey: 'GBR'},
+        };
+
+        // Function to convert value to color
+        function getColor(value) {
+            // If no value, return grey
+            if (value === undefined) {
+                return '#CCCCCC';
+            }
+            
+            // Convert -1 to 1 scale to 0 to 1 scale
+            var scale = (value + 1) / 2;
+            
+            // Calculate RGB values
+            // var r = Math.round(255 * (1 - scale));
+            var r = 0
+            var g = Math.round(255 * scale);
+            var b = 0
+            
+            // Convert to hex
+            var rHex = r.toString(16).padStart(2, '0');
+            var gHex = g.toString(16).padStart(2, '0');
+            var bHex = b.toString(16).padStart(2, '0');
+            
+            return ('#' + rHex + gHex + bHex).toUpperCase();
+        }
+
+        // Create color object for each country
+        var colors = {};
+        Object.keys(dataset).forEach(function(key) {
+          colors[key] = getColor(dataset[key].value);
+          dataset[key].fill = colors[key];
+        });
+
+        const fills = {
+          ...colors,
+            defaultFill: '#efefee',
+        }
+        console.log(dataset)
+
+        // Create the map
+        var map = new Datamap({
+            scope: 'world',
+            element: document.getElementById('container'),
+            responsive: true,
+            projection: 'equirectangular',
+            fills: fills,
+            data: dataset,
+            geographyConfig: {
+                highlightOnHover: true,
+                borderColor: '#666',
+                popupTemplate: function(geo, data) {
+                    // Show country name and value in tooltip
+                    var value = dataset[geo.id]?.value !== undefined ? dataset[geo.id].value.toFixed(2) : 'No data';
+                    return '<div class="hoverinfo">' +
+                           '<strong>' + geo.properties.name + '</strong><br>' +
+                           'Value: ' + value +
+                           '</div>';
+                }
+            }
+        });
+
+        // Make the map responsive
+        window.addEventListener('resize', function() {
+            map.resize();
+        });
+    </script>
+</body>
+</html>
