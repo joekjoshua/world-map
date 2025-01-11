@@ -8,16 +8,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.all.min.js"></script>
     <style>
-      body {
+      html, body {
+        flex: '1 1 auto';
+        align-self: 'stretch';
         margin: 0px;
+        width: 80%;
+        height: 80%;
         min-width: 200px;
         padding: 20px;
       }
-        #container {
-            position: relative;
-            width: 80%;
-            margin: 0 auto;
-        }
+      #container {
+          position: relative;
+          width: 80%;
+          margin: 0 auto;
+      }
     </style>
 </head>
 <body>
