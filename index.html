@@ -92,20 +92,46 @@
         // Parse URL search parameters
         const urlParams = new URLSearchParams(window.location.search);
         const paramsObject = Object.fromEntries(urlParams.entries());
-        const value = JSON.parse(paramsObject.value || [])
+        const mid = JSON.parse(paramsObject.mid || 0) 
+        const values = JSON.parse(paramsObject.value || [])
         const countryGroups = paramsObject.countries.split('|').map(t => t.split(','))
-        
+        const max = Math.max(...values)
+        const min = Math.min(...values);
+        function getColor(value, max, min, mid=0) {
+            // If no value, return grey
+            if (value === undefined) {
+                return '#CCCCCC';
+            }
+            
+            // Convert -1 to 1 scale to 0 to 1 scale
+            value = (value - mid)/(max - min)
+            var scale = (value + 1) / 2;
+            
+            // Calculate RGB values
+            var r = Math.round(255 * (1 - scale));
+            // var r = 0
+            var g = Math.round(255 * scale);
+            var b = 0
+            
+            // Convert to hex
+            var rHex = r.toString(16).padStart(2, '0');
+            var gHex = g.toString(16).padStart(2, '0');
+            var bHex = b.toString(16).padStart(2, '0');
+            
+            return ('#' + rHex + gHex + bHex).toUpperCase();
+        }
+
         const dataset = {};
         countryGroups.forEach((cs, i) => {
           cs.forEach(country => {
-            dataset[country] = { value: value[i], fillKey: country }
+            dataset[country] = { value: values[i], fillKey: country }
           })
         })
 
         const baseColor = '#4F46E5'
         const calcColor = (value) => {
-          return value >= 0 ? calculateTintAndShade(baseColor, value).shade.hex
-            : calculateTintAndShade(baseColor, -value).tint.hex
+          return value >= mid ? calculateTintAndShade(baseColor, (value - mid)/(max-mid)).shade.hex
+            : calculateTintAndShade(baseColor, (value - mid) / (min-mid)).tint.hex
         }
         // Sample data: countries with values between -1 and 1
         var datasetDefault = {
@@ -122,34 +148,13 @@
         };
 
         // Function to convert value to color
-        function getColor(value) {
-            // If no value, return grey
-            if (value === undefined) {
-                return '#CCCCCC';
-            }
-            
-            // Convert -1 to 1 scale to 0 to 1 scale
-            var scale = (value + 1) / 2;
-            
-            // Calculate RGB values
-            // var r = Math.round(255 * (1 - scale));
-            var r = 0
-            var g = Math.round(255 * scale);
-            var b = 0
-            
-            // Convert to hex
-            var rHex = r.toString(16).padStart(2, '0');
-            var gHex = g.toString(16).padStart(2, '0');
-            var bHex = b.toString(16).padStart(2, '0');
-            
-            return ('#' + rHex + gHex + bHex).toUpperCase();
-        }
+        
 
         // Create color object for each country
         var colors = {};
         Object.keys(dataset).forEach(function(key) {
-          // colors[key] = getColor(dataset[key].value);
-          colors[key] = calcColor(dataset[key].value);
+          colors[key] = getColor(dataset[key].value, max, min, mid);
+          // colors[key] = calcColor(dataset[key].value);
         });
 
         const fills = {
