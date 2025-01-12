@@ -92,7 +92,8 @@
         // Parse URL search parameters
         const urlParams = new URLSearchParams(window.location.search);
         const paramsObject = Object.fromEntries(urlParams.entries());
-        const mid = JSON.parse(paramsObject.mid || 0) 
+        const mid = paramsObject.mid || 0 
+        const label = paramsObject.label || 'value'
         const values = JSON.parse(paramsObject.value || [])
         const countryGroups = paramsObject.countries.split('|').map(t => t.split(','))
         const max = Math.max(...values)
@@ -179,7 +180,7 @@
                     var value = dataset[geo.id]?.value !== undefined ? dataset[geo.id].value.toFixed(2) : 'No data';
                     return '<div class="hoverinfo">' +
                            '<strong>' + geo.properties.name + '</strong><br>' +
-                           'Value: ' + value +
+                           label + ': ' + value +
                            '</div>';
                 }
             }
