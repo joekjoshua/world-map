@@ -196,7 +196,19 @@
       const margin = {top: 20, right: 40, bottom: 30, left: 120};
       const containerWidth = document.getElementById('table').offsetWidth;
       const width = containerWidth - margin.left - margin.right;
-      const height = 400 - margin.top - margin.bottom;
+
+      const baseCountry = 'USA';
+      const baseValue = dataset[baseCountry]?.value || 0;
+
+      // Convert dataset object to array for D3 and calculate % difference
+      const data = Object.entries(dataset).map(([country, data]) => ({
+        country,
+        value: ((data.value - baseValue) / baseValue) * 100  // Convert to percentage difference
+      }));
+      
+      // Dynamic height calculation: 24px per entry
+      const heightPerEntry = 24;
+      const height = Math.max(400, data.length * heightPerEntry);
 
       const svg = d3.select("#table")
         .append("svg")
@@ -210,99 +222,104 @@
         .attr("viewBox", `0 0 ${containerWidth} ${height + margin.top + margin.bottom}`)
         .attr("preserveAspectRatio", "xMinYMin meet");
 
-      // Convert dataset object to array for D3
-      const data = Object.entries(dataset).map(([country, data]) => ({
-        country,
-        value: data.value
-      }));
-
-      // Create scales (swapped x and y)
-      const y = d3.scale.ordinal()
-        .rangeRoundBands([0, height], .1)
-        .domain(data.map(d => d.country));
-
+      // Update domain for x scale to use percentage range
       const x = d3.scale.linear()
         .range([0, width])
-        .domain([min, max]);
+        .domain([
+          Math.min(...data.map(d => d.value)),
+          Math.max(...data.map(d => d.value))
+        ])
+        .nice();
 
-      // Calculate center position for x-axis
-      const xCenter = x(0);
+      const y = d3.scale.ordinal()
+        .rangeRoundBands([0, height], .3)
+        .domain(data.map(d => d.country));
 
       // Create axes
       const xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom");
+        .orient("bottom")
+        .tickSize(height);
 
-      const yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
-
-      // Add x-axis at the center
+      // Add x-axis grid
       svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", `translate(0,${height})`)
-        .call(xAxis);
+        .call(xAxis)
+        .selectAll("text")
+        .attr("y", -8)
+        .attr("x", 0);
 
       // Add center line
-      svg.append("line")
-        .attr("class", "center-line")
-        .attr("x1", x(0))
-        .attr("x2", x(0))
-        .attr("y1", 0)
-        .attr("y2", height)
-        .style("stroke", "#000")
-        .style("stroke-width", "1px");
-
-      // Add y-axis
       svg.append("g")
         .attr("class", "y axis")
-        .call(yAxis)
-        .selectAll("text")
-        .style("text-anchor", "end");
+        .append("line")
+        .attr("x1", x(0))
+        .attr("x2", x(0))
+        .attr("y2", height)
+        .style("stroke", "#000");
 
-      // Add bars
-      svg.selectAll(".bar")
+      // Create bars with labels
+      const bars = svg.selectAll("g.bar")
         .data(data)
-        .enter().append("rect")
-        .attr("class", "bar")
+        .enter()
+        .append("g")
+        .attr("class", "bar");
+
+      // Add the bars
+      bars.append("rect")
+        .attr("x", d => x(Math.min(0, d.value)))
         .attr("y", d => y(d.country))
-        .attr("height", y.rangeBand())
-        .attr("x", d => d.value < 0 ? x(d.value) : x(0))
         .attr("width", d => Math.abs(x(d.value) - x(0)))
+        .attr("height", y.rangeBand())
         .style("fill", d => getColor(d.value, max, min, mid));
+
+      // Add country labels
+      bars.append("text")
+        .attr("class", "label")
+        .attr("x", 0)
+        .attr("y", d => y(d.country))
+        .attr("dy", y.rangeBand() / 2)
+        .attr("dx", -10)
+        .attr("text-anchor", "end")
+        .text(d => d.country);
+
+      // Add value labels
+      bars.append("text")
+        .attr("class", "value")
+        .attr("x", d => d.value < 0 ? x(d.value) - 5 : x(d.value) + 5)
+        .attr("y", d => y(d.country) + y.rangeBand() / 2)
+        .attr("dy", ".35em")
+        .attr("text-anchor", d => d.value < 0 ? "end" : "start")
+        .text(d => d.value.toFixed(1) + "%");
 
       // Update styles
       const style = document.createElement('style');
       style.textContent = `
-        .axis path,
+        .axis path {
+          display: none;
+        }
         .axis line {
-          fill: none;
-          stroke: #000;
+          stroke: #e0e0e0;
           shape-rendering: crispEdges;
         }
-        .center-line {
-          stroke-dasharray: 4,4;
+        .axis text {
+          font-size: 12px;
         }
-        .bar {
+        .bar rect {
           fill: steelblue;
         }
-        .bar:hover {
+        .bar rect:hover {
           opacity: 0.8;
+        }
+        .label {
+          font-size: 12px;
+        }
+        .value {
+          font-size: 11px;
+          fill: #666;
         }
       `;
       document.head.appendChild(style);
-
-      window.addEventListener('resize', function() {
-        const newWidth = document.getElementById('table').offsetWidth - margin.left - margin.right;
-        x.range([0, newWidth]);
-        svg.select(".x.axis").call(xAxis);
-        svg.select(".center-line")
-            .attr("x1", x(0))
-            .attr("x2", x(0));
-        svg.selectAll(".bar")
-            .attr("x", d => d.value < 0 ? x(d.value) : x(0))
-            .attr("width", d => Math.abs(x(d.value) - x(0)));
-      });
     </script>
 </body>
 </html>
