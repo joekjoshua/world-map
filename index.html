@@ -603,10 +603,10 @@
             borderColor: '#666',
             popupTemplate: function(geo, data) {
                 // Show country name and value in tooltip
-                var value = dataset[geo.id]?.value !== undefined ? dataset[geo.id].value.toFixed(2) : 'No data';
+                var value = dataset[geo.id]?.value !== undefined ? 'Price' + ': $' + dataset[geo.id].value.toFixed(2) : 'No data';
                 return '<div class="hoverinfo">' +
                   '<strong>' + geo.properties.name + '</strong><br>' +
-                  'Price' + ': $' + value +
+                  value +
                   '</div>';
             }
         }
