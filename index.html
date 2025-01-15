@@ -536,7 +536,7 @@
         NGA: 0.84, 
       }
     </script>
-    <script>
+    <script> // getColor
       function getColor(value, max, min, mid=0) {
           // If no value, return grey
           if (value === undefined) {
@@ -561,8 +561,7 @@
           return ('#' + rHex + gHex + bHex).toUpperCase();
       }
     </script>
-    <script>
-      // Parse URL search parameters
+    <script> // Parse URL search parameters
       const urlParams = new URLSearchParams(window.location.search);
       const paramsObject = Object.fromEntries(urlParams.entries());
       const mid = paramsObject?.mid || 0 
@@ -592,9 +591,8 @@
         ...colors,
           defaultFill: '#222',
       }
-      console.log(dataset)
-
-      // Create the map
+    </script>
+    <script> // Create the map
       var map = new Datamap({
         scope: 'world',
         element: document.getElementById('map'),
@@ -620,8 +618,9 @@
       window.addEventListener('resize', function() {
             map.resize();
       });
-
-      // Create bar chart
+    </script>
+    <script> // Create bar chart
+      
       const margin = {top: 20, right: 40, bottom: 30, left: 120};
       const containerWidth = document.getElementById('table').offsetWidth;
       const width = containerWidth - margin.left - margin.right;
@@ -725,36 +724,37 @@
 
       // Update styles
       const style = document.createElement('style');
-      style.textContent = `
-        .axis path {
-          display: none;
-        }
-        .axis line {
-          stroke: #e0e0e0;
-          shape-rendering: crispEdges;
-        }
-        .axis text {
-          font-size: 12px;
-          fill: white;
-        }
-        .bar rect {
-          fill: steelblue;
-        }
-        .bar rect:hover {
-          opacity: 0.8;
-        }
-        .label {
-          font-size: 12px;
-          fill: white;
-        }
-        .value {
-          font-size: 11px;
-          fill: white;
-        }
-      `;
-      document.head.appendChild(style);
+      // style.textContent = `
+      //   .axis path {
+      //     display: none;
+      //   }
+      //   .axis line {
+      //     stroke: #e0e0e0;
+      //     shape-rendering: crispEdges;
+      //   }
+      //   .axis text {
+      //     font-size: 12px;
+      //     fill: white;
+      //   }
+      //   .bar rect {
+      //     fill: steelblue;
+      //   }
+      //   .bar rect:hover {
+      //     opacity: 0.8;
+      //   }
+      //   .label {
+      //     font-size: 12px;
+      //     fill: white;
+      //   }
+      //   .value {
+      //     font-size: 11px;
+      //     fill: white;
+      //   }
+      // `;
+      // document.head.appendChild(style);
 
-
+    </script>
+    <script>
       if (mid) {
         document.getElementById('myPrice').value = mid; // Set the input value to mid
         document.getElementById('myPrice').focus()
