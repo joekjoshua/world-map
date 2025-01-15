@@ -11,7 +11,6 @@
       html {
         height: 100%;
         width: 100%;
-        background-color: ;
       }
       body {
         flex: '1 1 auto';
@@ -21,6 +20,7 @@
         height: 100%;
         position: absolute;
         overflow: scroll;
+        /* background-color: #222; */
       }
       #container {
           position: relative;
@@ -208,7 +208,7 @@
       }));
       
       // Dynamic height calculation: 24px per entry
-      const heightPerEntry = 24;
+      const heightPerEntry = 8;
       const height = Math.max(400, data.length * heightPerEntry);
 
       const svg = d3.select("#table")
@@ -272,7 +272,7 @@
         .attr("y", d => y(d.country))
         .attr("width", d => Math.abs(x(d.value) - x(0)))
         .attr("height", y.rangeBand())
-        .style("fill", d => getColor(d.value, max, min, mid));
+        .style("fill", d => getColor(d.value, Math.max(...data.map(d => d.value)), Math.min(...data.map(d => d.value)), mid));
 
       // Add country labels
       bars.append("text")
@@ -282,7 +282,8 @@
         .attr("dy", y.rangeBand() / 2)
         .attr("dx", -10)
         .attr("text-anchor", "end")
-        .text(d => d.country);
+        .text(d => d.country)
+        .style("font-size", "8px");
 
       // Add value labels
       bars.append("text")
@@ -291,7 +292,8 @@
         .attr("y", d => y(d.country) + y.rangeBand() / 2)
         .attr("dy", ".35em")
         .attr("text-anchor", d => d.value < 0 ? "end" : "start")
-        .text(d => d.value.toFixed(1) + "%");
+        .text(d => d.value.toFixed(1) + "%")
+        .style("font-size", "8px");
 
       // Update styles
       const style = document.createElement('style');
