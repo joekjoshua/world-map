@@ -182,28 +182,30 @@
             myprice: 10,
             test: ['a', 'b'],
             competitor: 'netflix',
+            shades: [0,1,2,3,4,5,6,7,8,9,10].map(n => `<div style="width: 20px; height: 20px; background-color: ${getColor(n, 10,0, 5)};"></div>`),
+            getFills: (myprice) => {
+              const prices = Alpine.store('app').prices[Alpine.store('app').competitor]
+              const max = Math.max(...Object.values(prices))
+              const min = Math.min(...Object.values(prices))
+            
+              // Create color object for each country
+              var colors = {};
+              Object.keys(prices).forEach(function(key) {
+                colors[key] = getColor(prices[key], max, min, myprice);
+              });
+
+              return {
+                ...colors,
+                  defaultFill: '#222',
+              }
+            },
             drawMap: (myprice) => {
               const prices = Alpine.store('app').prices[Alpine.store('app').competitor]
               const dataset = {}
               for(const [key, value] of Object.entries(prices)) {
                 dataset[key] = { value: prices[key], fillKey: key }
               }
-              
-              const max = Math.max(...Object.values(prices))
-              const min = Math.min(...Object.values(prices))
-              
-              const baseColor = '#4F46E5'
-              // Create color object for each country
-              var colors = {};
-              Object.keys(dataset).forEach(function(key) {
-                colors[key] = getColor(dataset[key].value, max, min, myprice);
-              });
-  
-              const fills = {
-                ...colors,
-                  defaultFill: '#222',
-              }
-
+              const fills = Alpine.store('app').getFills(myprice)
               document.getElementById('map').innerHTML = ''
               var map = new Datamap({
                 scope: 'world',
@@ -233,12 +235,9 @@
               });
             },
             onPriceChange: (e) => {
-              console.log(e.target.value)
-              const myprice = e.target.value; // Get the new value from the input
-              Alpine.store('app').drawMap(myprice)
+              Alpine.store('app').drawMap(Alpine.store('app').myprice)
             },
             onCompetitorChange: (e) => {
-              console.log(e.target.value)
               Alpine.store('app').drawMap(Alpine.store('app').myprice)
             }
         })
@@ -271,8 +270,19 @@
         </select>
       </div>
     </div>
+    <div style="display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; padding: 16px; align-items: center; color: white;" x-data>
+      Your price is 
+      <div style="gap: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; color: white">
+        Expensive
+        <div style="display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; color: white">
+          <template x-for="n in [0,1,2,3,4,5,6,7,8,9,10]">
+            <div x-html="Alpine.store('app').shades[n]"></div>
+          </template>
+        </div>
+        Cheap
+      </div>
+    </div>
     <div id="map"></div>
-    <div id="bar"></div>
     <div class="tableContainer" x-data>
       <div class="table">
         <div class="column">
