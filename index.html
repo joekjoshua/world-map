@@ -18,7 +18,7 @@
         width: 100%;
       }
       body {
-        background-color: #222;
+        /* background-color: #222; */
         flex: '1 1 auto';
         align-self: 'stretch';
         margin: 0px;
@@ -282,7 +282,7 @@
           </template>
         </div>
         <div class="column">
-          <div class="header" x-text="$store.app.competitor.toUpperCase()"></div>
+          <div class="header" x-text="$store.app.competitor.toUpperCase() + ' (USD)'"></div>
           <template x-for="price in Object.values($store.app.prices[$store.app.competitor])">
             <div class="cell" x-text="price.toFixed(2)"></div>
           </template>
