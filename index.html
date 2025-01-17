@@ -7,6 +7,8 @@
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.9/datamaps.all.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -16,7 +18,7 @@
         width: 100%;
       }
       body {
-        /* background-color: #222; */
+        background-color: #222;
         flex: '1 1 auto';
         align-self: 'stretch';
         margin: 0px;
@@ -99,16 +101,161 @@
         color: inherit;
         outline: none;
       }
+
+      .tableContainer {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .table {
+        border: 1px solid #e6ebfc;
+        border-radius: 8px;
+        overflow: hidden;
+        background-color: white;
+        display: flex;
+      }
+      .table .column {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 80px;
+      }
+      .table .column .header {
+        height: 32px;
+        background-color: white;
+        font-size: 12px;
+        padding: 2px 4px;
+        display: flex;
+        align-items: center;
+      }
+      .table .column .cell {
+        height: 24px;
+        background-color: rgb(252, 252, 252);
+        font-size: 16px;
+        padding: 2px 4px;
+        display: flex;
+        align-items: center;
+      }
     </style>
 </head>
+<script>
+  const netflixUSAPrice = 10
+  const netflixIndex = { PAK: 0.18, EGY: 0.26, KEN: 0.3, BLZ: 0.39, BOL: 0.39, CUB: 0.39, DMA: 0.39, GRD: 0.39, GUY: 0.39, HTI: 0.39, IND: 0.39, JAM: 0.39, NIC: 0.39, PRY: 0.39, LCA: 0.39, MAF: 0.39, VCT: 0.39, SUR: 0.39, VEN: 0.39, MAR: 0.42, NGA: 0.46, PHL: 0.46, COL: 0.48, TUR: 0.49, IDN: 0.5, UKR: 0.5, AFG: 0.52, DZA: 0.52, AGO: 0.52, BGD: 0.52, BEN: 0.52, BTN: 0.52, BWA: 0.52, BFA: 0.52, BDI: 0.52, KHM: 0.52, CMR: 0.52, CPV: 0.52, CAF: 0.52, TCD: 0.52, COM: 0.52, COG: 0.52, COD: 0.52, CIV: 0.52, DJI: 0.52, DOM: 0.52, ECU: 0.52, SLV: 0.52, GNQ: 0.52, ERI: 0.52, SWZ: 0.52, ETH: 0.52, FJI: 0.52, GAB: 0.52, GMB: 0.52, GHA: 0.52, GTM: 0.52, GIN: 0.52, GNB: 0.52, HND: 0.52, IRN: 0.52, IRQ: 0.52, JOR: 0.52, KIR: 0.52, LAO: 0.52, LBN: 0.52, LSO: 0.52, LBR: 0.52, LBY: 0.52, MDG: 0.52, MWI: 0.52, MLI: 0.52, MRT: 0.52, MUS: 0.52, MNG: 0.52, MOZ: 0.52, MMR: 0.52, NAM: 0.52, NPL: 0.52, NER: 0.52, PSE: 0.52, PNG: 0.52, RWA: 0.52, WSM: 0.52, STP: 0.52, SEN: 0.52, SYC: 0.52, SLE: 0.52, SLB: 0.52, SOM: 0.52, SSD: 0.52, LKA: 0.52, SDN: 0.52, TZA: 0.52, TLS: 0.52, TGO: 0.52, TON: 0.52, TUN: 0.52, TUV: 0.52, UGA: 0.52, VUT: 0.52, YEM: 0.52, ZMB: 0.52, ZWE: 0.52, ALB: 0.54, BIH: 0.54, BGR: 0.54, HRV: 0.54, MNE: 0.54, MKD: 0.54, SRB: 0.54, SVN: 0.54, ZAF: 0.55, BRA: 0.58, PAN: 0.58, VNM: 0.58, KWT: 0.64, MAC: 0.64, QAT: 0.64, CHL: 0.65, THA: 0.65, ARM: 0.67, AZE: 0.67, BLR: 0.67, EST: 0.67, KAZ: 0.67, KGZ: 0.67, LVA: 0.67, LTU: 0.67, MDA: 0.67, KOR: 0.67, TKM: 0.67, UZB: 0.67, BHR: 0.68, MYS: 0.68, OMN: 0.68, PER: 0.69, JPN: 0.72, HKG: 0.74, ROU: 0.74, HUN: 0.75, SVK: 0.77, CAN: 0.79, GEO: 0.79, POL: 0.79, TWN: 0.79, TJK: 0.79, NOR: 0.81, PRT: 0.81, AUS: 0.83, CRI: 0.84, CYP: 0.84, GRC: 0.84, NZL: 0.85, SAU: 0.85, ARE: 0.85, AND: 0.87, GIB: 0.87, MLT: 0.87, SMR: 0.87, BRN: 0.9, CZE: 0.9, PYF: 0.9, IMN: 0.9, MDV: 0.9, NRU: 0.9, NCL: 0.9, GBR: 0.9, URY: 0.9, FRA: 0.91, MCO: 0.91, MEX: 0.93, SWE: 0.93, AUT: 0.94, FIN: 0.94, DEU: 0.94, ITA: 0.94, NLD: 0.94, ESP: 0.94, SGP: 0.97, BRB: 0.99, ISR: 0.99, ASM: 1, ATG: 1, ABW: 1, BHS: 1, BMU: 1, VGB: 1, CYM: 1, CUW: 1, GUM: 1, MHL: 1, FSM: 1, MNP: 1, PLW: 1, PRI: 1, SXM: 1, KNA: 1, TTO: 1, TCA: 1, VIR: 1, USA: 1, BEL: 1.01, ISL: 1.01, IRL: 1.01, LUX: 1.01, DNK: 1.25, FRO: 1.25, GRL: 1.25, ARG: 1.3, LIE: 1.55, CHE: 1.55,}
+  const netflixPrices = {}
+  for (const [key,value] of Object.entries(netflixIndex)) {
+    netflixPrices[key] = value * netflixUSAPrice
+  }
+</script>
+<script>
+  const spotifyPrices = { LIE: 15.67,  CHE: 15.67,  DNK: 15.27,  GBR: 14.99,  ISL: 12.49,  IRL: 12.49,  FIN: 12.49,  USA: 11.99,  FRA: 11.58,  SMR: 11.45,  NLD: 11.45,  MCO: 11.45,  LUX: 11.45,  ITA: 11.45,  ESP: 11.45,  DEU: 11.45,  BEL: 11.45,  AUT: 11.45,  AND: 11.45,  NOR: 11.41,  SWE: 10.81,  NZL: 10.73,  LVA: 10.41,  EST: 10.41,  PLW: 9.99,  MHL: 9.99,  LTU: 9.36,  MAR: 9.08,  CAN: 8.81,  HKG: 8.75,  AUS: 8.74,  PRT: 8.32,  MLT: 8.32,  GRC: 8.32,  CYP: 8.32,  SGP: 8.13,  URY: 7.99,  KOR: 7.52,  TUV: 7.49,  NRU: 7.49,  KIR: 7.49,  CZE: 7.03,  PAN: 6.99,  MAC: 6.99,  BRN: 6.99,  SVK: 6.76,  SVN: 6.76,  HRV: 6.76,  GTM: 6.49,  ECU: 6.49,  CRI: 6.49,  MEX: 6.43,  JPN: 6.26,  ISR: 6.02,  VEN: 5.99,  VCT: 5.99,  TTO: 5.99,  SLV: 5.99,  SUR: 5.99,  PRY: 5.99,  NIC: 5.99,  LCA: 5.99,  KNA: 5.99,  JAM: 5.99,  HND: 5.99,  GUY: 5.99,  GRD: 5.99,  DOM: 5.99,  DMA: 5.99,  CUW: 5.99,  BLZ: 5.99,  BHS: 5.99,  BOL: 5.99,  BRB: 5.99,  ATG: 5.99,  ARE: 5.99,  POL: 5.88,  SAU: 5.85,  XKX: 5.72,  SRB: 5.72,  MKD: 5.72,  MNE: 5.72,  BIH: 5.72,  ALB: 5.72,  PER: 5.63,  QAT: 5.51,  BGR: 5.31,  ROU: 5.04,  HUN: 5.02,  WSM: 4.99,  VUT: 4.99,  TON: 4.99,  SLB: 4.99,  PNG: 4.99,  FSM: 4.99,  FJI: 4.99,  UKR: 4.99,  MDA: 4.99,  BLR: 4.99,  UZB: 4.99,  TLS: 4.99,  TJK: 4.99,  PSE: 4.99,  OMN: 4.99,  MDV: 4.99,  MNG: 4.99,  LBN: 4.99,  KAZ: 4.99,  KWT: 4.99,  KGZ: 4.99,  JOR: 4.99,  GEO: 4.99,  BHR: 4.99,  AZE: 4.99,  ARM: 4.99,  SYC: 4.99,  DZA: 4.99,  CHL: 4.6,  TWN: 4.56,  THA: 4.06,  COL: 3.88,  BRA: 3.6,  ZAF: 3.55,  MYS: 3.54,  IRQ: 3.45,  IDN: 3.4,  HTI: 2.99,  NPL: 2.99,  LAO: 2.99,  KHM: 2.99,  BTN: 2.99,  ZWE: 2.99,  ZMB: 2.99,  TGO: 2.99,  TCD: 2.99,  SWZ: 2.99,  STP: 2.99,  SEN: 2.99,  SLE: 2.99,  RWA: 2.99,  NER: 2.99,  NAM: 2.99,  MOZ: 2.99,  MWI: 2.99,  MUS: 2.99,  MRT: 2.99,  MLI: 2.99,  MDG: 2.99,  LBY: 2.99,  LSO: 2.99,  LBR: 2.99,  COM: 2.99,  GNB: 2.99,  GNQ: 2.99,  GIN: 2.99,  GMB: 2.99,  GAB: 2.99,  ETH: 2.99,  DJI: 2.99,  CPV: 2.99,  CMR: 2.99,  CIV: 2.99,  COG: 2.99,  COD: 2.99,  BWA: 2.99,  BEN: 2.99,  BDI: 2.99,  BFA: 2.99,  AGO: 2.99,  TZA: 2.92,  UGA: 2.74,  KEN: 2.63,  LKA: 2.56,  PHL: 2.54,  ARG: 2.46,  VNM: 2.32,  TUR: 1.7,  BGD: 1.67,  GHA: 1.5,  IND: 1.4,  EGY: 1.38,  PAK: 1.26,  TUN: 0.92,  NGA: 0.84, }
+</script>
+<script> // getColor
+  function getColor(value, max, min, mid=0) {
+      // If no value, return grey
+      if (value === undefined) {
+          return '#CCCCCC';
+      }
+      
+      // Convert -1 to 1 scale to 0 to 1 scale
+      value = (value - mid)/(max - min)
+      var scale = (value + 1) / 2;
+      
+      // Calculate RGB values
+      var r = Math.round(255 * (1 - scale));
+      // var r = 0
+      var g = Math.round(255 * scale);
+      var b = 0
+      
+      // Convert to hex
+      var rHex = r.toString(16).padStart(2, '0');
+      var gHex = g.toString(16).padStart(2, '0');
+      var bHex = b.toString(16).padStart(2, '0');
+      
+      return ('#' + rHex + gHex + bHex).toUpperCase();
+  }
+</script>
+<script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.store('app', {
+            prices: { netflix: netflixPrices, spotify: spotifyPrices },
+            myprice: 10,
+            test: ['a', 'b'],
+            competitor: 'netflix',
+            drawMap: (myprice) => {
+              const prices = Alpine.store('app').prices[Alpine.store('app').competitor]
+              const dataset = {}
+              for(const [key, value] of Object.entries(prices)) {
+                dataset[key] = { value: prices[key], fillKey: key }
+              }
+              
+              const max = Math.max(...Object.values(prices))
+              const min = Math.min(...Object.values(prices))
+              
+              const baseColor = '#4F46E5'
+              // Create color object for each country
+              var colors = {};
+              Object.keys(dataset).forEach(function(key) {
+                colors[key] = getColor(dataset[key].value, max, min, myprice);
+              });
+  
+              const fills = {
+                ...colors,
+                  defaultFill: '#222',
+              }
+
+              document.getElementById('map').innerHTML = ''
+              var map = new Datamap({
+                scope: 'world',
+                element: document.getElementById('map'),
+                responsive: true,
+                projection: 'equirectangular',
+                fills: fills,
+                data: dataset,
+                geographyConfig: {
+                    highlightOnHover: true,
+                    borderColor: '#666',
+                    popupTemplate: function(geo, data) {
+                        // Show country name and value in tooltip
+                        var value = dataset[geo.id]?.value !== undefined ? 'Price' + ': $' + dataset[geo.id].value.toFixed(2) : 'No data';
+                        return '<div class="hoverinfo">' +
+                          '<strong>' + geo.properties.name + '</strong><br>' +
+                          value +
+                          '</div>';
+                    }
+                }
+              });
+              window.removeEventListener('resize', function() {
+                    map.resize();
+              });
+              window.addEventListener('resize', function() {
+                    map.resize();
+              });
+            },
+            onPriceChange: (e) => {
+              console.log(e.target.value)
+              const myprice = e.target.value; // Get the new value from the input
+              Alpine.store('app').drawMap(myprice)
+            },
+            onCompetitorChange: (e) => {
+              console.log(e.target.value)
+              Alpine.store('app').drawMap(Alpine.store('app').myprice)
+            }
+        })
+      })
+      document.addEventListener('alpine:initialized', () => {
+        Alpine.store('app').drawMap(Alpine.store('app').myprice)
+      })
+</script>
 <body>
+    <div class="content">
     <div id="title" >Compare Global App Prices</div id="title">
     <div id="subtitle">Check your global price competitiveness.</div id="title">
     <div id="inputContainer">
       <div style="display: flex; position: relative; flex-direction: column; gap: 12px"> 
         <label for="myPrice" style="margin-left: 5px; margin-right: 5px; color: white; height: 24px">My Global Price</label>
-        <div style="display: flex; position: relative;"> 
-          <input id="myPrice" type="number" min="0" max="100" placeholder="price" />
+        <div style="display: flex; position: relative;" x-data> 
+          <input id="myPrice" type="number" min="0" max="100" placeholder="price" x-model="$store.app.myprice" @change="$store.app.onPriceChange"/>
           <span class="dollar-sign">$</span>
         </div>
       </div>
@@ -116,673 +263,32 @@
         <label for="inputCompetitor" style="margin-left: 5px; margin-right: 5px; color: white;; height: 24px"></label>
         <div style="min-width: 32px; min-height: 32px; border-radius: 32px; background-color: #ffffff4d; display: flex; align-items: center; justify-content: center;">vs</div>
       </div>
-      <div style="display: flex; position: relative; flex-direction: column; gap: 12px"> 
+      <div style="display: flex; position: relative; flex-direction: column; gap: 12px" x-data> 
         <label for="inputCompetitor" style="margin-left: 5px; margin-right: 5px; color: white;; height: 24px">Competitor</label>
-        <select id="inputCompetitor">
+        <select id="inputCompetitor" x-model="$store.app.competitor" @change="$store.app.onCompetitorChange">
           <option value="netflix">Netflix</option>
           <option value="spotify">Spotify</option>
         </select>
       </div>
     </div>
     <div id="map"></div>
-    <div id="table"></div>
-    <script>
-      const netflixUSAPrice = 10
-      const netflixIndex = {
-          PAK: 0.18,
-          EGY: 0.26,
-          KEN: 0.3,
-          BLZ: 0.39,
-          BOL: 0.39,
-          CUB: 0.39,
-          DMA: 0.39,
-          GRD: 0.39,
-          GUY: 0.39,
-          HTI: 0.39,
-          IND: 0.39,
-          JAM: 0.39,
-          NIC: 0.39,
-          PRY: 0.39,
-          LCA: 0.39,
-          MAF: 0.39,
-          VCT: 0.39,
-          SUR: 0.39,
-          VEN: 0.39,
-          MAR: 0.42,
-          NGA: 0.46,
-          PHL: 0.46,
-          COL: 0.48,
-          TUR: 0.49,
-          IDN: 0.5,
-          UKR: 0.5,
-          AFG: 0.52,
-          DZA: 0.52,
-          AGO: 0.52,
-          BGD: 0.52,
-          BEN: 0.52,
-          BTN: 0.52,
-          BWA: 0.52,
-          BFA: 0.52,
-          BDI: 0.52,
-          KHM: 0.52,
-          CMR: 0.52,
-          CPV: 0.52,
-          CAF: 0.52,
-          TCD: 0.52,
-          COM: 0.52,
-          COG: 0.52,
-          COD: 0.52,
-          CIV: 0.52,
-          DJI: 0.52,
-          DOM: 0.52,
-          ECU: 0.52,
-          SLV: 0.52,
-          GNQ: 0.52,
-          ERI: 0.52,
-          SWZ: 0.52,
-          ETH: 0.52,
-          FJI: 0.52,
-          GAB: 0.52,
-          GMB: 0.52,
-          GHA: 0.52,
-          GTM: 0.52,
-          GIN: 0.52,
-          GNB: 0.52,
-          HND: 0.52,
-          IRN: 0.52,
-          IRQ: 0.52,
-          JOR: 0.52,
-          KIR: 0.52,
-          LAO: 0.52,
-          LBN: 0.52,
-          LSO: 0.52,
-          LBR: 0.52,
-          LBY: 0.52,
-          MDG: 0.52,
-          MWI: 0.52,
-          MLI: 0.52,
-          MRT: 0.52,
-          MUS: 0.52,
-          MNG: 0.52,
-          MOZ: 0.52,
-          MMR: 0.52,
-          NAM: 0.52,
-          NPL: 0.52,
-          NER: 0.52,
-          PSE: 0.52,
-          PNG: 0.52,
-          RWA: 0.52,
-          WSM: 0.52,
-          STP: 0.52,
-          SEN: 0.52,
-          SYC: 0.52,
-          SLE: 0.52,
-          SLB: 0.52,
-          SOM: 0.52,
-          SSD: 0.52,
-          LKA: 0.52,
-          SDN: 0.52,
-          TZA: 0.52,
-          TLS: 0.52,
-          TGO: 0.52,
-          TON: 0.52,
-          TUN: 0.52,
-          TUV: 0.52,
-          UGA: 0.52,
-          VUT: 0.52,
-          YEM: 0.52,
-          ZMB: 0.52,
-          ZWE: 0.52,
-          ALB: 0.54,
-          BIH: 0.54,
-          BGR: 0.54,
-          HRV: 0.54,
-          MNE: 0.54,
-          MKD: 0.54,
-          SRB: 0.54,
-          SVN: 0.54,
-          ZAF: 0.55,
-          BRA: 0.58,
-          PAN: 0.58,
-          VNM: 0.58,
-          KWT: 0.64,
-          MAC: 0.64,
-          QAT: 0.64,
-          CHL: 0.65,
-          THA: 0.65,
-          ARM: 0.67,
-          AZE: 0.67,
-          BLR: 0.67,
-          EST: 0.67,
-          KAZ: 0.67,
-          KGZ: 0.67,
-          LVA: 0.67,
-          LTU: 0.67,
-          MDA: 0.67,
-          KOR: 0.67,
-          TKM: 0.67,
-          UZB: 0.67,
-          BHR: 0.68,
-          MYS: 0.68,
-          OMN: 0.68,
-          PER: 0.69,
-          JPN: 0.72,
-          HKG: 0.74,
-          ROU: 0.74,
-          HUN: 0.75,
-          SVK: 0.77,
-          CAN: 0.79,
-          GEO: 0.79,
-          POL: 0.79,
-          TWN: 0.79,
-          TJK: 0.79,
-          NOR: 0.81,
-          PRT: 0.81,
-          AUS: 0.83,
-          CRI: 0.84,
-          CYP: 0.84,
-          GRC: 0.84,
-          NZL: 0.85,
-          SAU: 0.85,
-          ARE: 0.85,
-          AND: 0.87,
-          GIB: 0.87,
-          MLT: 0.87,
-          SMR: 0.87,
-          BRN: 0.9,
-          CZE: 0.9,
-          PYF: 0.9,
-          IMN: 0.9,
-          MDV: 0.9,
-          NRU: 0.9,
-          NCL: 0.9,
-          GBR: 0.9,
-          URY: 0.9,
-          FRA: 0.91,
-          MCO: 0.91,
-          MEX: 0.93,
-          SWE: 0.93,
-          AUT: 0.94,
-          FIN: 0.94,
-          DEU: 0.94,
-          ITA: 0.94,
-          NLD: 0.94,
-          ESP: 0.94,
-          SGP: 0.97,
-          BRB: 0.99,
-          ISR: 0.99,
-          ASM: 1,
-          ATG: 1,
-          ABW: 1,
-          BHS: 1,
-          BMU: 1,
-          VGB: 1,
-          CYM: 1,
-          CUW: 1,
-          GUM: 1,
-          MHL: 1,
-          FSM: 1,
-          MNP: 1,
-          PLW: 1,
-          PRI: 1,
-          SXM: 1,
-          KNA: 1,
-          TTO: 1,
-          TCA: 1,
-          VIR: 1,
-          USA: 1,
-          BEL: 1.01,
-          ISL: 1.01,
-          IRL: 1.01,
-          LUX: 1.01,
-          DNK: 1.25,
-          FRO: 1.25,
-          GRL: 1.25,
-          ARG: 1.3,
-          LIE: 1.55,
-          CHE: 1.55,
-      }
-
-      const netflixPrices = {}
-      for (const [key,value] of Object.entries(netflixIndex)) {
-        netflixPrices[key] = value * netflixUSAPrice
-      }
-    </script>
-    <script>
-      const spotifyPrices = {
-        LIE: 15.67, 
-        CHE: 15.67, 
-        DNK: 15.27, 
-        GBR: 14.99, 
-        ISL: 12.49, 
-        IRL: 12.49, 
-        FIN: 12.49, 
-        USA: 11.99, 
-        FRA: 11.58, 
-        SMR: 11.45, 
-        NLD: 11.45, 
-        MCO: 11.45, 
-        LUX: 11.45, 
-        ITA: 11.45, 
-        ESP: 11.45, 
-        DEU: 11.45, 
-        BEL: 11.45, 
-        AUT: 11.45, 
-        AND: 11.45, 
-        NOR: 11.41, 
-        SWE: 10.81, 
-        NZL: 10.73, 
-        LVA: 10.41, 
-        EST: 10.41, 
-        PLW: 9.99, 
-        MHL: 9.99, 
-        LTU: 9.36, 
-        MAR: 9.08, 
-        CAN: 8.81, 
-        HKG: 8.75, 
-        AUS: 8.74, 
-        PRT: 8.32, 
-        MLT: 8.32, 
-        GRC: 8.32, 
-        CYP: 8.32, 
-        SGP: 8.13, 
-        URY: 7.99, 
-        KOR: 7.52, 
-        TUV: 7.49, 
-        NRU: 7.49, 
-        KIR: 7.49, 
-        CZE: 7.03, 
-        PAN: 6.99, 
-        MAC: 6.99, 
-        BRN: 6.99, 
-        SVK: 6.76, 
-        SVN: 6.76, 
-        HRV: 6.76, 
-        GTM: 6.49, 
-        ECU: 6.49, 
-        CRI: 6.49, 
-        MEX: 6.43, 
-        JPN: 6.26, 
-        ISR: 6.02, 
-        VEN: 5.99, 
-        VCT: 5.99, 
-        TTO: 5.99, 
-        SLV: 5.99, 
-        SUR: 5.99, 
-        PRY: 5.99, 
-        NIC: 5.99, 
-        LCA: 5.99, 
-        KNA: 5.99, 
-        JAM: 5.99, 
-        HND: 5.99, 
-        GUY: 5.99, 
-        GRD: 5.99, 
-        DOM: 5.99, 
-        DMA: 5.99, 
-        CUW: 5.99, 
-        BLZ: 5.99, 
-        BHS: 5.99, 
-        BOL: 5.99, 
-        BRB: 5.99, 
-        ATG: 5.99, 
-        ARE: 5.99, 
-        POL: 5.88, 
-        SAU: 5.85, 
-        XKX: 5.72, 
-        SRB: 5.72, 
-        MKD: 5.72, 
-        MNE: 5.72, 
-        BIH: 5.72, 
-        ALB: 5.72, 
-        PER: 5.63, 
-        QAT: 5.51, 
-        BGR: 5.31, 
-        ROU: 5.04, 
-        HUN: 5.02, 
-        WSM: 4.99, 
-        VUT: 4.99, 
-        TON: 4.99, 
-        SLB: 4.99, 
-        PNG: 4.99, 
-        FSM: 4.99, 
-        FJI: 4.99, 
-        UKR: 4.99, 
-        MDA: 4.99, 
-        BLR: 4.99, 
-        UZB: 4.99, 
-        TLS: 4.99, 
-        TJK: 4.99, 
-        PSE: 4.99, 
-        OMN: 4.99, 
-        MDV: 4.99, 
-        MNG: 4.99, 
-        LBN: 4.99, 
-        KAZ: 4.99, 
-        KWT: 4.99, 
-        KGZ: 4.99, 
-        JOR: 4.99, 
-        GEO: 4.99, 
-        BHR: 4.99, 
-        AZE: 4.99, 
-        ARM: 4.99, 
-        SYC: 4.99, 
-        DZA: 4.99, 
-        CHL: 4.6, 
-        TWN: 4.56, 
-        THA: 4.06, 
-        COL: 3.88, 
-        BRA: 3.6, 
-        ZAF: 3.55, 
-        MYS: 3.54, 
-        IRQ: 3.45, 
-        IDN: 3.4, 
-        HTI: 2.99, 
-        NPL: 2.99, 
-        LAO: 2.99, 
-        KHM: 2.99, 
-        BTN: 2.99, 
-        ZWE: 2.99, 
-        ZMB: 2.99, 
-        TGO: 2.99, 
-        TCD: 2.99, 
-        SWZ: 2.99, 
-        STP: 2.99, 
-        SEN: 2.99, 
-        SLE: 2.99, 
-        RWA: 2.99, 
-        NER: 2.99, 
-        NAM: 2.99, 
-        MOZ: 2.99, 
-        MWI: 2.99, 
-        MUS: 2.99, 
-        MRT: 2.99, 
-        MLI: 2.99, 
-        MDG: 2.99, 
-        LBY: 2.99, 
-        LSO: 2.99, 
-        LBR: 2.99, 
-        COM: 2.99, 
-        GNB: 2.99, 
-        GNQ: 2.99, 
-        GIN: 2.99, 
-        GMB: 2.99, 
-        GAB: 2.99, 
-        ETH: 2.99, 
-        DJI: 2.99, 
-        CPV: 2.99, 
-        CMR: 2.99, 
-        CIV: 2.99, 
-        COG: 2.99, 
-        COD: 2.99, 
-        BWA: 2.99, 
-        BEN: 2.99, 
-        BDI: 2.99, 
-        BFA: 2.99, 
-        AGO: 2.99, 
-        TZA: 2.92, 
-        UGA: 2.74, 
-        KEN: 2.63, 
-        LKA: 2.56, 
-        PHL: 2.54, 
-        ARG: 2.46, 
-        VNM: 2.32, 
-        TUR: 1.7, 
-        BGD: 1.67, 
-        GHA: 1.5, 
-        IND: 1.4, 
-        EGY: 1.38, 
-        PAK: 1.26, 
-        TUN: 0.92, 
-        NGA: 0.84, 
-      }
-    </script>
-    <script> // getColor
-      function getColor(value, max, min, mid=0) {
-          // If no value, return grey
-          if (value === undefined) {
-              return '#CCCCCC';
-          }
-          
-          // Convert -1 to 1 scale to 0 to 1 scale
-          value = (value - mid)/(max - min)
-          var scale = (value + 1) / 2;
-          
-          // Calculate RGB values
-          var r = Math.round(255 * (1 - scale));
-          // var r = 0
-          var g = Math.round(255 * scale);
-          var b = 0
-          
-          // Convert to hex
-          var rHex = r.toString(16).padStart(2, '0');
-          var gHex = g.toString(16).padStart(2, '0');
-          var bHex = b.toString(16).padStart(2, '0');
-          
-          return ('#' + rHex + gHex + bHex).toUpperCase();
-      }
-    </script>
-    <script> // Parse URL search parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramsObject = Object.fromEntries(urlParams.entries());
-      const mid = paramsObject?.mid || 0 
-      const competitor = paramsObject?.competitor || 'netflix'
-      const prices = competitor === 'netflix' ? netflixPrices 
-        : competitor === 'spotify' ? spotifyPrices
-        : netflixPrices 
-      console.log(prices, netflixIndex, spotifyPrices)
-      const max = Math.max(...Object.values(prices))
-      const min = Math.min(...Object.values(prices))
-      const dataset = {}
-      for(const [key, value] of Object.entries(prices)) {
-        dataset[key] = { value: prices[key], fillKey: key }
-      }
-      const baseColor = '#4F46E5'
-      
-      // Function to convert value to color
-      
-
-      // Create color object for each country
-      var colors = {};
-      Object.keys(dataset).forEach(function(key) {
-        colors[key] = getColor(dataset[key].value, max, min, mid);
-      });
-
-      const fills = {
-        ...colors,
-          defaultFill: '#222',
-      }
-    </script>
-    <script> // Create the map
-      var map = new Datamap({
-        scope: 'world',
-        element: document.getElementById('map'),
-        responsive: true,
-        projection: 'equirectangular',
-        fills: fills,
-        data: dataset,
-        geographyConfig: {
-            highlightOnHover: true,
-            borderColor: '#666',
-            popupTemplate: function(geo, data) {
-                // Show country name and value in tooltip
-                var value = dataset[geo.id]?.value !== undefined ? 'Price' + ': $' + dataset[geo.id].value.toFixed(2) : 'No data';
-                return '<div class="hoverinfo">' +
-                  '<strong>' + geo.properties.name + '</strong><br>' +
-                  value +
-                  '</div>';
-            }
-        }
-      });
-
-      // Make the map responsive
-      window.addEventListener('resize', function() {
-            map.resize();
-      });
-    </script>
-    <script> // Create bar chart
-      
-      const margin = {top: 20, right: 40, bottom: 30, left: 120};
-      const containerWidth = document.getElementById('table').offsetWidth;
-      const width = containerWidth - margin.left - margin.right;
-
-      const baseCountry = 'USA';
-      const baseValue = dataset[baseCountry]?.value || 0;
-
-      // Convert dataset object to array for D3 and calculate % difference
-      const data = Object.entries(dataset).map(([country, data]) => ({
-        country,
-        value: ((data.value - baseValue) / baseValue) * 100  // Convert to percentage difference
-      }));
-      
-      // Dynamic height calculation: 24px per entry
-      const heightPerEntry = 8;
-      const height = Math.max(400, data.length * heightPerEntry);
-
-      const svg = d3.select("#table")
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-
-      // Add viewBox for responsiveness
-      d3.select(svg.node().parentNode)
-        .attr("viewBox", `0 0 ${containerWidth} ${height + margin.top + margin.bottom}`)
-        .attr("preserveAspectRatio", "xMinYMin meet");
-
-      // Update domain for x scale to use percentage range
-      const x = d3.scale.linear()
-        .range([0, width])
-        .domain([
-          Math.min(...data.map(d => d.value)),
-          Math.max(...data.map(d => d.value))
-        ])
-        .nice();
-
-      const y = d3.scale.ordinal()
-        .rangeRoundBands([0, height], .3)
-        .domain(data.map(d => d.country));
-
-      // Create axes
-      const xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom")
-        .tickSize(0);
-
-      // Add x-axis grid
-      svg.append("g")
-        .attr("class", "x axis")
-        .call(xAxis)
-        .selectAll("text")
-        .attr("y", -8)
-        .attr("x", 0);
-
-      // Add center line
-      svg.append("g")
-        .attr("class", "y axis")
-        .append("line")
-        .attr("x1", x(0))
-        .attr("x2", x(0))
-        .attr("y2", height)
-        .style("stroke", "#000");
-
-      // Create bars with labels
-      const bars = svg.selectAll("g.bar")
-        .data(data)
-        .enter()
-        .append("g")
-        .attr("class", "bar");
-
-      // Add the bars
-      bars.append("rect")
-        .attr("x", d => x(Math.min(0, d.value)))
-        .attr("y", d => y(d.country))
-        .attr("width", d => Math.abs(x(d.value) - x(0)))
-        .attr("height", y.rangeBand())
-        .style("fill", d => getColor(d.value, Math.max(...data.map(d => d.value)), Math.min(...data.map(d => d.value)), mid));
-
-      // Add country labels
-      bars.append("text")
-        .attr("class", "label")
-        .attr("x", 0)
-        .attr("y", d => y(d.country))
-        .attr("dy", y.rangeBand() / 2)
-        .attr("dx", -10)
-        .attr("text-anchor", "end")
-        .text(d => d.country)
-        .style("font-size", "8px");
-
-      // Add value labels
-      bars.append("text")
-        .attr("class", "value")
-        .attr("x", d => d.value < 0 ? x(d.value) - 5 : x(d.value) + 5)
-        .attr("y", d => y(d.country) + y.rangeBand() / 2)
-        .attr("dy", ".35em")
-        .attr("text-anchor", d => d.value < 0 ? "end" : "start")
-        .text(d => d.value.toFixed(1) + "%")
-        .style("font-size", "8px");
-
-      // Update styles
-      const style = document.createElement('style');
-      // style.textContent = `
-      //   .axis path {
-      //     display: none;
-      //   }
-      //   .axis line {
-      //     stroke: #e0e0e0;
-      //     shape-rendering: crispEdges;
-      //   }
-      //   .axis text {
-      //     font-size: 12px;
-      //     fill: white;
-      //   }
-      //   .bar rect {
-      //     fill: steelblue;
-      //   }
-      //   .bar rect:hover {
-      //     opacity: 0.8;
-      //   }
-      //   .label {
-      //     font-size: 12px;
-      //     fill: white;
-      //   }
-      //   .value {
-      //     font-size: 11px;
-      //     fill: white;
-      //   }
-      // `;
-      // document.head.appendChild(style);
-
-    </script>
-    <script>
-      if (mid) {
-        document.getElementById('myPrice').value = mid; // Set the input value to mid
-        document.getElementById('myPrice').focus()
-      }
-
-      if (competitor) {
-        document.getElementById('inputCompetitor').value = competitor;
-      }
-
-      document.getElementById('myPrice').addEventListener('input', function() {
-        const newValue = this.value; // Get the new value from the input
-        const urlParams = new URLSearchParams(window.location.search); // Get current URL parameters
-        urlParams.set('mid', newValue); // Update the "mid" parameter with the new value
-        console.log(Array.from(urlParams.entries()))
-        const searchString = Array.from(urlParams.entries()).reduce((cum, cur) => cum + '&' + cur[0] + '=' + cur[1], '')
-        console.log(searchString)
-        window.location.search = searchString // Reload the page with the updated URL parameters
-      });
-
-      document.getElementById('inputCompetitor').addEventListener('input', function() {
-        const newValue = this.value; // Get the new value from the input
-        const urlParams = new URLSearchParams(window.location.search); // Get current URL parameters
-        urlParams.set('competitor', newValue); // Update the "mid" parameter with the new value
-        console.log(Array.from(urlParams.entries()))
-        const searchString = Array.from(urlParams.entries()).reduce((cum, cur) => cum + '&' + cur[0] + '=' + cur[1], '')
-        console.log(searchString)
-        window.location.search = searchString // Reload the page with the updated URL parameters
-      });
-    </script>
+    <div id="bar"></div>
+    <div class="tableContainer" x-data>
+      <div class="table">
+        <div class="column">
+          <div class="header">Country</div>
+          <template x-for="country in Object.keys($store.app.prices[$store.app.competitor])">
+            <div class="cell" x-text="country"></div>
+          </template>
+        </div>
+        <div class="column">
+          <div class="header" x-text="$store.app.competitor.toUpperCase()"></div>
+          <template x-for="price in Object.values($store.app.prices[$store.app.competitor])">
+            <div class="cell" x-text="price.toFixed(2)"></div>
+          </template>
+        </div>
+      </div>
+    </div>
+    
 </body>
 </html>
