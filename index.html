@@ -158,7 +158,7 @@
       }
       
       // Convert -1 to 1 scale to 0 to 1 scale
-      value = (value - mid)/(max - min)
+      value = Math.max(-1, Math.min(1,(value - mid)/(max - min)))
       var scale = (value + 1) / 2;
       
       // Calculate RGB values
